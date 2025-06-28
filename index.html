@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shared Bill Splitter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-color: #fdfaf4;
+      --primary: #6B4226; /* warm brown */
+      --accent: #E1B000;  /* dark yellow */
+      --alert: #C84630;   /* healthy red */
+      --text-dark: #2E1F15;
+      --text-light: #fff;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-dark);
+    }
+
+    .container {
+      background-color: #fff8e7;
+      max-width: 650px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(50, 30, 10, 0.1);
+      border: 2px solid var(--accent);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .icon-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-label i {
+      color: var(--accent);
+    }
+
+    .housemate-list {
+      margin-top: 10px;
+    }
+
+    .housemate {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      font-size: 15px;
+      background: var(--primary);
+      color: var(--text-light);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--accent);
+      color: var(--text-dark);
+    }
+
+    button.remove {
+      background: var(--alert);
+    }
+
+    .results {
+      margin-top: 25px;
+      background: #fff2cc;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px dashed var(--accent);
+    }
+
+    ul {
+      padding-left: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2><i class="fas fa-home"></i> Shared House Bill Splitter</h2>
+
+  <label class="icon-label" for="water">
+    <i class="fas fa-tint"></i> Water Bill (LKR)
+  </label>
+  <input type="number" id="water" placeholder="Enter water bill" />
+
+  <label class="icon-label" for="electricity">
+    <i class="fas fa-bolt"></i> Electricity Bill (LKR)
+  </label>
+  <input type="number" id="electricity" placeholder="Enter electricity bill" />
+
+  <label class="icon-label">
+    <i class="fas fa-user-friends"></i> Housemates
+  </label>
+  <div class="housemate-list" id="housemateList"></div>
+  <button onclick="addHousemate()"><i class="fas fa-user-plus"></i> Add Housemate</button>
+
+  <button onclick="calculateSplit()"><i class="fas fa-calculator"></i> Calculate Split</button>
+
+  <div class="results" id="results"></div>
+</div>
+
+<script>
+  let housemateCount = 0;
+
+  function addHousemate() {
+    housemateCount++;
+    const list = document.getElementById('housemateList');
+    const div = document.createElement('div');
+    div.className = 'housemate';
+    div.id = 'housemate-' + housemateCount;
+    div.innerHTML = `
+      <input type="text" placeholder="Name of Housemate" class="name" />
+      <button class="remove" onclick="removeHousemate('${div.id}')">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+    `;
+    list.appendChild(div);
+  }
+
+  function removeHousemate(id) {
+    const el = document.getElementById(id);
+    el.remove();
+  }
+
+  function calculateSplit() {
+    const water = parseFloat(document.getElementById('water').value) || 0;
+    const electricity = parseFloat(document.getElementById('electricity').value) || 0;
+    const housemateElements = document.querySelectorAll('.housemate .name');
+    const resultsDiv = document.getElementById('results');
+    
+    const names = Array.from(housemateElements).map(input => input.value.trim()).filter(name => name !== "");
+
+    if (names.length === 0) {
+      resultsDiv.innerHTML = "<p style='color: var(--alert); font-weight:bold;'>❗ Add at least one housemate.</p>";
+      return;
+    }
+
+    const total = water + electricity;
+    const perPerson = (total / names.length).toFixed(2);
+
+    let output = `<p><strong>Total Bill:</strong> LKR ${total.toFixed(2)}</p>`;
+    output += `<p><strong>Each person owes:</strong> LKR ${perPerson}</p><ul>`;
+    names.forEach(name => {
+      output += `<li><i class="fas fa-user"></i> ${name}: LKR ${perPerson}</li>`;
+    });
+    output += `</ul>`;
+
+    resultsDiv.innerHTML = output;
+  }
+</script>
+
+</body>
+</html>
